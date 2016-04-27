@@ -1,5 +1,6 @@
-from random import randint
+from random import randint, sample
 from models.channel import Channel
+from models.download import Download
 from models.torrent import Torrent
 
 
@@ -10,12 +11,14 @@ class TriblerData:
         self.torrents = []
         self.torrent_files = {}
         self.subscribed_channels = set()
+        self.downloads = []
 
         self.read_torrent_files()
         self.generate_torrents()
         self.generate_channels()
         self.assign_subscribed_channels()
         self.assign_torrents_to_channels()
+        self.generate_downloads()
 
     # Generate channels from the random_channels file
     def generate_channels(self):
@@ -77,3 +80,8 @@ class TriblerData:
         for channel in self.channels:
             if str(channel.id) == id:
                 return channel
+
+    def generate_downloads(self):
+        random_torrents = sample(self.torrents, randint(10, 30))
+        for torrent in random_torrents:
+            self.downloads.append(Download(torrent))
