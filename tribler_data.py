@@ -12,6 +12,7 @@ class TriblerData:
         self.torrent_files = {}
         self.subscribed_channels = set()
         self.downloads = []
+        self.my_channel = -1
 
         self.read_torrent_files()
         self.generate_torrents()
@@ -39,6 +40,9 @@ class TriblerData:
             pair = channel_name_desc_pairs[rand_index]
             del channel_name_desc_pairs[rand_index]
             self.channels.append(Channel(i, name=pair[0], description=pair[1]))
+
+        # Pick one of these channels as your channel
+        self.my_channel = randint(0, len(self.channels))
 
     def assign_subscribed_channels(self):
         # Make between 10 and 50 channels subscribed channels
@@ -80,6 +84,11 @@ class TriblerData:
         for channel in self.channels:
             if str(channel.id) == id:
                 return channel
+
+    def get_my_channel(self):
+        if self.my_channel == -1:
+            return None
+        return self.channels[self.my_channel]
 
     def generate_downloads(self):
         random_torrents = sample(self.torrents, randint(10, 30))

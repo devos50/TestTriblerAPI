@@ -1,4 +1,5 @@
 from random import randint
+from utils import get_random_hex_string
 
 
 class Channel:
@@ -7,6 +8,7 @@ class Channel:
         self.name = name
         self.description = description
         self.id = id
+        self.channel_id = get_random_hex_string(40)
         self.votes = randint(0, 10000)
         self.spam_votes = randint(0, 10000)
         self.modified = randint(10, 10000)

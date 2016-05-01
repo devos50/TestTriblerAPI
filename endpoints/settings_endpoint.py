@@ -16,7 +16,7 @@ class SettingsEndpoint(resource.Resource):
             },
             "video": {
                 "enabled": True,
-                "port": "1337",
+                "port": "-1",
             },
             "libtorrent": {
                 "enabled": True,

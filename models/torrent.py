@@ -1,3 +1,4 @@
+from random import randint
 
 
 class Torrent:
@@ -9,6 +10,7 @@ class Torrent:
         self.length = length
         self.category = category
         self.files = []
+        self.time_added = randint(1200000000, 1460000000)
 
     def get_json(self):
         return {"name": self.name, "infohash": self.infohash, "length": self.length, "category": self.category}
