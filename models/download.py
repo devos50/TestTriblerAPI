@@ -1,4 +1,5 @@
 from random import randint, uniform
+from constants import DLSTATUS_STRINGS
 
 
 class Download:
@@ -13,6 +14,6 @@ class Download:
         self.up_speed = randint(0, 1000000)
 
     def get_json(self):
-        return {"name": self.torrent.name, "infohash": self.torrent.infohash, "status": self.status,
+        return {"name": self.torrent.name, "infohash": self.torrent.infohash, "status": DLSTATUS_STRINGS[self.status],
                 "peers": self.peers, "seeds": self.seeds, "progress": self.progress, "size": self.torrent.length,
-                "down_speed": self.down_speed, "up_speed": self.up_speed}
+                "speed_down": self.down_speed, "speed_up": self.up_speed, "eta": 1234}

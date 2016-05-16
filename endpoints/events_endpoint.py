@@ -12,18 +12,6 @@ class EventsEndpoint(resource.Resource):
         resource.Resource.__init__(self)
         self.event_request = None
 
-        # Schedule download status which is pushed every second
-        # lc = LoopingCall(self.upload_download_state).start(1)
-
-    def upload_download_state(self):
-        if self.event_request is None:
-            return
-
-        download_details = []
-        for download in tribler_utils.tribler_data.downloads:
-            download_details.append(download.get_json())
-        self.event_request.write(json.dumps({"type": "downloads", "downloads": download_details}))
-
     def on_search_results_channels(self, results):
         for result in results:
             self.event_request.write(json.dumps({"type": "search_result_channel", "result": result}) + '\n')
