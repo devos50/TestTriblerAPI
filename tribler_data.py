@@ -35,7 +35,7 @@ class TriblerData:
                 channel_name_desc_pairs.append((item_parts[0], desc))
 
         num_channels = randint(1000, len(channel_name_desc_pairs))
-        for i in range(1, num_channels):
+        for i in range(0, num_channels):
             rand_index = randint(0, len(channel_name_desc_pairs) - 1)
             pair = channel_name_desc_pairs[rand_index]
             del channel_name_desc_pairs[rand_index]
@@ -83,6 +83,11 @@ class TriblerData:
     def get_channel_with_id(self, id):
         for channel in self.channels:
             if str(channel.id) == id:
+                return channel
+
+    def get_channel_with_cid(self, cid):
+        for channel in self.channels:
+            if str(channel.cid) == cid:
                 return channel
 
     def get_my_channel(self):

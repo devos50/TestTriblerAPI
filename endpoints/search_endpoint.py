@@ -11,6 +11,10 @@ class SearchEndpoint(resource.Resource):
 
     isLeaf = True
 
+    def __init__(self, events_endpoint):
+        resource.Resource.__init__(self)
+        self.events_endpoint = events_endpoint
+
     def render_GET(self, request):
         # Just ignore the query and return some random channels/torrents
         num_channels = len(tribler_utils.tribler_data.channels)
@@ -23,8 +27,12 @@ class SearchEndpoint(resource.Resource):
         for index in picked_channels:
             channels_json.append(tribler_utils.tribler_data.channels[index].get_json())
 
+        self.events_endpoint.on_search_results_channels(channels_json)
+
         torrents_json = []
         for index in picked_torrents:
             torrents_json.append(tribler_utils.tribler_data.torrents[index].get_json())
 
-        return json.dumps({"channels": channels_json, "torrents": torrents_json})
+        self.events_endpoint.on_search_results_torrents(torrents_json)
+
+        return json.dumps({"queried": True})

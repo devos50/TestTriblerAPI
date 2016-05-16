@@ -8,7 +8,7 @@ class Channel:
         self.name = name
         self.description = description
         self.id = id
-        self.channel_id = get_random_hex_string(40)
+        self.cid = get_random_hex_string(40)
         self.votes = randint(0, 10000)
         self.spam_votes = randint(0, 10000)
         self.modified = randint(10, 10000)
@@ -21,4 +21,4 @@ class Channel:
     def get_json(self):
         return {"id": self.id, "name": self.name, "description": self.description, "votes": self.votes,
                 "torrents": len(self.torrents), "spam": self.spam_votes, "modified": self.modified,
-                "sub": self.subscribed}
+                "subscribed": self.subscribed, "dispersy_cid": self.cid}

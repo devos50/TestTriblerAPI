@@ -13,7 +13,10 @@ class RootEndpoint(resource.Resource):
     def __init__(self):
         resource.Resource.__init__(self)
 
-        self.search_endpoint = SearchEndpoint()
+        self.events_endpoint = EventsEndpoint()
+        self.putChild("events", self.events_endpoint)
+
+        self.search_endpoint = SearchEndpoint(self.events_endpoint)
         self.putChild("search", self.search_endpoint)
 
         self.mychannel_endpoint = MyChannelEndpoint()
@@ -31,5 +34,3 @@ class RootEndpoint(resource.Resource):
         self.variables_endpoint = VariablesEndpoint()
         self.putChild("variables", self.variables_endpoint)
 
-        self.events_endpoint = EventsEndpoint()
-        self.putChild("events", self.events_endpoint)

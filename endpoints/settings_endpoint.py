@@ -52,3 +52,7 @@ class SettingsEndpoint(resource.Resource):
         }}
 
         return json.dumps(settings_dict)
+
+    # Do nothing when we are saving the settings
+    def render_PUT(self, request):
+        return json.dumps({"saved": True})
