@@ -14,9 +14,13 @@ class Channel:
         self.modified = randint(10, 10000)
         self.torrents = set()
         self.subscribed = False
+        self.playlists = set()
 
     def add_torrent(self, torrent):
         self.torrents.add(torrent)
+
+    def add_playlist(self, playlist):
+        self.playlists.add(playlist)
 
     def get_json(self):
         return {"id": self.id, "name": self.name, "description": self.description, "votes": self.votes,

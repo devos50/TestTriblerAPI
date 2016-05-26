@@ -76,8 +76,39 @@ class ChannelsModifySubscriptionEndpoint(BaseChannelsEndpoint):
 
 class ChannelsDiscoveredEndpoint(resource.Resource):
 
+    def getChild(self, path, request):
+        return ChannelsDiscoveredSpecificEndpoint(path)
+
     def render_GET(self, request):
         channels = []
         for channel in tribler_utils.tribler_data.channels:
             channels.append(channel.get_json())
         return json.dumps({"channels": channels}, ensure_ascii=False)
+
+
+class ChannelsDiscoveredSpecificEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid):
+        BaseChannelsEndpoint.__init__(self)
+
+        child_handler_dict = {"torrents": ChannelTorrentsEndpoint}
+        for path, child_cls in child_handler_dict.iteritems():
+            self.putChild(path, child_cls(cid))
+
+
+class ChannelTorrentsEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+
+    def render_GET(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return ChannelsModifySubscriptionEndpoint.return_404(request)
+
+        results_json = []
+        for torrent in channel.torrents:
+            results_json.append(torrent.get_json())
+
+        return json.dumps({"torrents": results_json})

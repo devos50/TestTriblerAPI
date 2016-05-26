@@ -1,11 +1,13 @@
+import base64
 from random import randint
+import binascii
 
 
 class Torrent:
 
     def __init__(self, id, infohash, name, length, category):
         self.id = id
-        self.infohash = infohash
+        self.infohash = binascii.a2b_base64(infohash).encode('hex')
         self.name = name
         self.length = length
         self.category = category

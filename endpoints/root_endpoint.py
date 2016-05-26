@@ -1,6 +1,5 @@
 from twisted.web import resource
 from channels_endpoint import ChannelsEndpoint
-from endpoints.channel_endpoint import ChannelEndpoint
 from endpoints.downloads_endpoint import DownloadsEndpoint
 from endpoints.events_endpoint import EventsEndpoint
 from endpoints.mychannel_endpoint import MyChannelEndpoint
@@ -22,9 +21,6 @@ class RootEndpoint(resource.Resource):
 
         self.mychannel_endpoint = MyChannelEndpoint()
         self.putChild("mychannel", self.mychannel_endpoint)
-
-        self.channel_endpoint = ChannelEndpoint()
-        self.putChild("channel", self.channel_endpoint)
 
         self.channels_endpoint = ChannelsEndpoint()
         self.putChild("channels", self.channels_endpoint)
