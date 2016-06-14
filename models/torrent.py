@@ -15,4 +15,4 @@ class Torrent:
         self.time_added = randint(1200000000, 1460000000)
 
     def get_json(self):
-        return {"name": self.name, "infohash": self.infohash, "length": self.length, "category": self.category}
+        return {"name": self.name, "infohash": self.infohash, "size": self.length, "category": self.category}

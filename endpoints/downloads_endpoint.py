@@ -6,11 +6,7 @@ import tribler_utils
 class DownloadsEndpoint(resource.Resource):
 
     def render_GET(self, request):
-        download_details = []
-        for download in tribler_utils.tribler_data.downloads:
-            download_details.append(download.get_json())
-
-        return json.dumps({"downloads": download_details})
+        return json.dumps({"downloads": [download.get_json() for download in tribler_utils.tribler_data.downloads]})
 
     def getChild(self, path, request):
         return DownloadEndpoint(path)
