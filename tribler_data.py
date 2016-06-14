@@ -41,7 +41,7 @@ class TriblerData:
                     desc = item_parts[1]
                 channel_name_desc_pairs.append((item_parts[0], desc))
 
-        num_channels = randint(1000, len(channel_name_desc_pairs))
+        num_channels = randint(300, len(channel_name_desc_pairs))
         for i in range(0, num_channels):
             rand_index = randint(0, len(channel_name_desc_pairs) - 1)
             pair = channel_name_desc_pairs[rand_index]

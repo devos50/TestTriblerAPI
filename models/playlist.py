@@ -14,6 +14,6 @@ class Playlist:
     def get_json(self):
         torrents_json = []
         for torrent in self.torrents:
-            torrents_json.append({"name": torrent.name, "infohash": torrent.infohash})
+            torrents_json.append(torrent.get_json())
 
         return {"id": self.id, "name": self.name, "description": self.description, "torrents": torrents_json}

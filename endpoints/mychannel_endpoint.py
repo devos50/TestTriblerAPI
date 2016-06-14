@@ -134,17 +134,3 @@ class MyChannelRecheckFeedsEndpoint(MyChannelBaseEndpoint):
 
         request.setHeader('Content-Type', 'text/json')
         return json.dumps({"rechecked": True})
-
-
-class MyChannelPlaylistsEndpoint(MyChannelBaseEndpoint):
-
-    def render_GET(self, request):
-        my_channel = tribler_utils.tribler_data.get_my_channel()
-        if my_channel is None:
-            return MyChannelBaseEndpoint.return_404(request)
-
-        playlists = []
-        for playlist in my_channel.playlists:
-            playlists.append(playlist.get_json())
-
-        return json.dumps({"playlists": playlists})

@@ -1,5 +1,8 @@
 import json
+from random import sample
+
 from twisted.web import http, resource
+
 import tribler_utils
 
 
@@ -14,13 +17,15 @@ class BaseChannelsEndpoint(resource.Resource):
         return json.dumps({"error": message})
 
 
-class ChannelsEndpoint(resource.Resource):
+class ChannelsEndpoint(BaseChannelsEndpoint):
 
-    def getChild(self, path, request):
-        if path == "subscribed":
-            return ChannelsSubscribedEndpoint()
-        elif path == "discovered":
-            return ChannelsDiscoveredEndpoint()
+    def __init__(self):
+        BaseChannelsEndpoint.__init__(self)
+
+        child_handler_dict = {"subscribed": ChannelsSubscribedEndpoint, "discovered": ChannelsDiscoveredEndpoint,
+                              "popular": ChannelsPopularEndpoint}
+        for path, child_cls in child_handler_dict.iteritems():
+            self.putChild(path, child_cls())
 
 
 class ChannelsSubscribedEndpoint(resource.Resource):
@@ -91,7 +96,7 @@ class ChannelsDiscoveredSpecificEndpoint(BaseChannelsEndpoint):
     def __init__(self, cid):
         BaseChannelsEndpoint.__init__(self)
 
-        child_handler_dict = {"torrents": ChannelTorrentsEndpoint}
+        child_handler_dict = {"torrents": ChannelTorrentsEndpoint, "playlists": ChannelPlaylistsEndpoint}
         for path, child_cls in child_handler_dict.iteritems():
             self.putChild(path, child_cls(cid))
 
@@ -112,3 +117,28 @@ class ChannelTorrentsEndpoint(BaseChannelsEndpoint):
             results_json.append(torrent.get_json())
 
         return json.dumps({"torrents": results_json})
+
+
+class ChannelPlaylistsEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+
+    def render_GET(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        playlists = []
+        for playlist in channel.playlists:
+            playlists.append(playlist.get_json())
+
+        return json.dumps({"playlists": playlists})
+
+
+class ChannelsPopularEndpoint(BaseChannelsEndpoint):
+
+    def render_GET(self, request):
+        results_json = [channel.get_json() for channel in sample(tribler_utils.tribler_data.channels, 20)]
+        return json.dumps({"channels": results_json})

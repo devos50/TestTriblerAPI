@@ -1,9 +1,11 @@
 from twisted.web import resource
-from channels_endpoint import ChannelsEndpoint
+
+from endpoints.channels.channels_endpoint import ChannelsEndpoint
 from endpoints.downloads_endpoint import DownloadsEndpoint
 from endpoints.events_endpoint import EventsEndpoint
 from endpoints.mychannel_endpoint import MyChannelEndpoint
 from endpoints.search_endpoint import SearchEndpoint
+from endpoints.torrents_endpoint import TorrentsEndpoint
 from endpoints.variables_endpoint import VariablesEndpoint
 from settings_endpoint import SettingsEndpoint
 
@@ -19,18 +21,9 @@ class RootEndpoint(resource.Resource):
         self.search_endpoint = SearchEndpoint(self.events_endpoint)
         self.putChild("search", self.search_endpoint)
 
-        self.mychannel_endpoint = MyChannelEndpoint()
-        self.putChild("mychannel", self.mychannel_endpoint)
+        child_handler_dict = {"channels": ChannelsEndpoint, "mychannel": MyChannelEndpoint,
+                              "settings": SettingsEndpoint, "variables": VariablesEndpoint,
+                              "downloads": DownloadsEndpoint, "torrents": TorrentsEndpoint}
 
-        self.channels_endpoint = ChannelsEndpoint()
-        self.putChild("channels", self.channels_endpoint)
-
-        self.settings_endpoint = SettingsEndpoint()
-        self.putChild("settings", self.settings_endpoint)
-
-        self.variables_endpoint = VariablesEndpoint()
-        self.putChild("variables", self.variables_endpoint)
-
-        self.downloads_endpoint = DownloadsEndpoint()
-        self.putChild("downloads", self.downloads_endpoint)
-
+        for path, child_cls in child_handler_dict.iteritems():
+            self.putChild(path, child_cls())
