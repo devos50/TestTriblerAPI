@@ -5,7 +5,7 @@ from models.playlist import Playlist
 from models.torrent import Torrent
 
 
-CREATE_MY_CHANNEL = False
+CREATE_MY_CHANNEL = True
 
 
 class TriblerData:

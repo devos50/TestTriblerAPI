@@ -96,7 +96,8 @@ class ChannelsDiscoveredSpecificEndpoint(BaseChannelsEndpoint):
     def __init__(self, cid):
         BaseChannelsEndpoint.__init__(self)
 
-        child_handler_dict = {"torrents": ChannelTorrentsEndpoint, "playlists": ChannelPlaylistsEndpoint}
+        child_handler_dict = {"torrents": ChannelTorrentsEndpoint, "playlists": ChannelPlaylistsEndpoint,
+                              "rssfeeds": ChannelRssFeedsEndpoint, "recheckfeeds": ChannelRecheckFeedsEndpoint}
         for path, child_cls in child_handler_dict.iteritems():
             self.putChild(path, child_cls(cid))
 
@@ -142,3 +143,72 @@ class ChannelsPopularEndpoint(BaseChannelsEndpoint):
     def render_GET(self, request):
         results_json = [channel.get_json() for channel in sample(tribler_utils.tribler_data.channels, 20)]
         return json.dumps({"channels": results_json})
+
+
+class ChannelRssFeedsEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+
+    def getChild(self, path, request):
+        return ChannelModifyRssFeedsEndpoint(self.cid, path)
+
+    def render_GET(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        request.setHeader('Content-Type', 'text/json')
+        feeds_list = []
+        for url in tribler_utils.tribler_data.rss_feeds:
+            feeds_list.append({'url': url})
+
+        return json.dumps({"rssfeeds": feeds_list})
+
+
+class ChannelModifyRssFeedsEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid, feed_url):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+        self.feed_url = feed_url
+
+    def render_PUT(self, request):
+        request.setHeader('Content-Type', 'text/json')
+
+        if self.feed_url in tribler_utils.tribler_data.rss_feeds:
+            request.setResponseCode(http.CONFLICT)
+            return json.dumps({"error": "this rss feed already exists"})
+
+        tribler_utils.tribler_data.rss_feeds.append(self.feed_url)
+
+        return json.dumps({"added": True})
+
+    def render_DELETE(self, request):
+        my_channel = tribler_utils.tribler_data.get_my_channel()
+        if my_channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        if self.feed_url not in tribler_utils.tribler_data.rss_feeds:
+            return BaseChannelsEndpoint.return_404(request, message="this url is not added to your RSS feeds")
+
+        tribler_utils.tribler_data.rss_feeds.remove(self.feed_url)
+
+        request.setHeader('Content-Type', 'text/json')
+        return json.dumps({"removed": True})
+
+
+class ChannelRecheckFeedsEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+
+    def render_POST(self, request):
+        my_channel = tribler_utils.tribler_data.get_my_channel()
+        if my_channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        request.setHeader('Content-Type', 'text/json')
+        return json.dumps({"rechecked": True})
