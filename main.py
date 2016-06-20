@@ -10,6 +10,7 @@ import tribler_utils
 
 def generate_tribler_data():
     tribler_utils.tribler_data = TriblerData()
+    tribler_utils.tribler_data.generate()
 
 logging.basicConfig()
 logger = logging.getLogger(__file__)

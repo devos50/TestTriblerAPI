@@ -4,6 +4,7 @@ from random import sample
 from twisted.web import http, resource
 
 import tribler_utils
+from models.playlist import Playlist
 
 
 class BaseChannelsEndpoint(resource.Resource):
@@ -126,6 +127,9 @@ class ChannelPlaylistsEndpoint(BaseChannelsEndpoint):
         BaseChannelsEndpoint.__init__(self)
         self.cid = cid
 
+    def getChild(self, path, request):
+        return ChannelsModifyPlaylistEndpoint(self.cid, path)
+
     def render_GET(self, request):
         channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
         if channel is None:
@@ -136,6 +140,71 @@ class ChannelPlaylistsEndpoint(BaseChannelsEndpoint):
             playlists.append(playlist.get_json())
 
         return json.dumps({"playlists": playlists})
+
+    def render_PUT(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        parameters = http.parse_qs(request.content.read(), 1)
+
+        if 'name' not in parameters or len(parameters['name']) == 0:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "name parameter missing"})
+
+        if 'description' not in parameters or len(parameters['description']) == 0:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "description parameter missing"})
+
+        channel.create_playlist(parameters['name'][0], parameters['description'][0])
+
+        return json.dumps({"created": True})
+
+
+class ChannelsModifyPlaylistEndpoint(BaseChannelsEndpoint):
+
+    def __init__(self, cid, playlist_id):
+        BaseChannelsEndpoint.__init__(self)
+        self.cid = cid
+        self.playlist_id = playlist_id
+
+    def render_DELETE(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        playlist = channel.get_playlist_with_id(self.playlist_id)
+        if playlist is None:
+            return BaseChannelsEndpoint.return_404(request, message="this playlist cannot be found")
+
+        channel.playlists.remove(playlist)
+
+        return json.dumps({"removed": True})
+
+    def render_POST(self, request):
+        channel = tribler_utils.tribler_data.get_channel_with_cid(self.cid)
+        if channel is None:
+            return BaseChannelsEndpoint.return_404(request)
+
+        parameters = http.parse_qs(request.content.read(), 1)
+
+        if 'name' not in parameters or len(parameters['name']) == 0:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "name parameter missing"})
+
+        if 'description' not in parameters or len(parameters['description']) == 0:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "description parameter missing"})
+
+        playlist = channel.get_playlist_with_id(self.playlist_id)
+        if playlist is None:
+            return BaseChannelsEndpoint.return_404(request, message="this playlist cannot be found")
+
+        playlist.name = parameters['name'][0]
+        playlist.description = parameters['description'][0]
+
+        return json.dumps({"modified": True})
+
 
 
 class ChannelsPopularEndpoint(BaseChannelsEndpoint):

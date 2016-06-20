@@ -19,14 +19,13 @@ class TriblerData:
         self.my_channel = -1
         self.rss_feeds = []
 
+    def generate(self):
         self.read_torrent_files()
         self.generate_torrents()
         self.generate_channels()
         self.assign_subscribed_channels()
-        self.assign_torrents_to_channels()
         self.generate_downloads()
         self.generate_rss_feeds()
-        self.generate_playlists()
 
     # Generate channels from the random_channels file
     def generate_channels(self):
@@ -86,12 +85,6 @@ class TriblerData:
         for i in range(randint(10, 30)):
             self.rss_feeds.append('http://test%d.com/feed.xml' % i)
 
-    def assign_torrents_to_channels(self):
-        for channel in self.channels:
-            num_torrents_in_channel = randint(0, len(self.torrents) - 1)
-            for i in range(0, num_torrents_in_channel):
-                channel.add_torrent(self.torrents[randint(0, len(self.torrents) - 1)])
-
     def get_channel_with_id(self, id):
         for channel in self.channels:
             if str(channel.id) == id:
@@ -112,19 +105,10 @@ class TriblerData:
             if download.torrent.infohash == infohash:
                 return download
 
+    def start_random_download(self):
+        random_torrent = sample(self.torrents, 1)[0]
+        self.downloads.append(Download(random_torrent))
+
     def generate_downloads(self):
-        random_torrents = sample(self.torrents, randint(10, 30))
-        for torrent in random_torrents:
-            self.downloads.append(Download(torrent))
-
-    def generate_playlists(self):
-        for channel in self.channels:
-            num_playlists = randint(1, 5)
-            for i in range(num_playlists):
-                playlist = Playlist(i, "Test playlist %d" % randint(1, 40), "This is a description")
-
-                picked_torrents = sample(channel.torrents, randint(0, min(20, len(channel.torrents))))
-                for torrent in picked_torrents:
-                    playlist.add_torrent(torrent)
-
-                channel.add_playlist(playlist)
+        for _ in xrange(randint(10, 30)):
+            self.start_random_download()

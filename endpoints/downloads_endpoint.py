@@ -1,3 +1,4 @@
+import cgi
 import json
 from twisted.web import http, resource
 import tribler_utils
@@ -5,11 +6,37 @@ import tribler_utils
 
 class DownloadsEndpoint(resource.Resource):
 
+    def getChild(self, path, request):
+        return DownloadEndpoint(path)
+
     def render_GET(self, request):
         return json.dumps({"downloads": [download.get_json() for download in tribler_utils.tribler_data.downloads]})
 
-    def getChild(self, path, request):
-        return DownloadEndpoint(path)
+    def render_PUT(self, request):
+        headers = request.getAllHeaders()
+        request_data = cgi.FieldStorage(fp=request.content, headers=headers,
+                                        environ={'REQUEST_METHOD': 'POST', 'CONTENT_TYPE': headers['content-type']})
+
+        if 'source' not in request_data:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "source parameter missing"})
+
+        if request_data['source'].value not in ['file', 'url']:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "source parameter should be either file or url"})
+
+        if request_data['source'].value == 'url' and 'url' not in request_data:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "url parameter missing"})
+
+        if request_data['source'].value == 'file' and 'file' not in request_data:
+            request.setResponseCode(http.BAD_REQUEST)
+            return json.dumps({"error": "file parameter missing"})
+
+        # Just start a fake download
+        tribler_utils.tribler_data.start_random_download()
+
+        return json.dumps({"added": True})
 
 
 class DownloadEndpoint(resource.Resource):
